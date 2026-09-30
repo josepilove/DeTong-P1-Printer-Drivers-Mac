@@ -12,6 +12,8 @@ Bulk OUT ep 0x01, printer-class interface 0. Status readback untested.
 Head: 384 dots @ 203 dpi. Unprintable: dots 0-10 and 351-383, so 340 usable.
 Tear bar is ~18 mm past the last row: end each page with a 112-dot feed.
 
+Pages are slices of one continuous roll, so the 112-dot tear feed is sent once per job, not per page.
+
 Quirks: jobs > ~25 KB vanish silently -> send 64-row bands, 4096-byte writes,
 0.4 s pause per band. The printer can hang until USB-reset (not yet handled
 by this driver; would need a custom backend).

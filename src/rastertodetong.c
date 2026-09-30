@@ -161,12 +161,13 @@ int main(int argc, char *argv[])
       }
     }
     if (band_rows) send_band(band, band_rows, pause_ms);
-    feed(TRAILING_FEED);
     if (pause_ms > 0) usleep((useconds_t)pause_ms * 1000);
 
     free(line); free(gray); free(err_cur); free(err_nxt); free(band);
   }
 
+  /* One tear feed per job: pages are slices of a continuous roll. */
+  if (started) feed(TRAILING_FEED);
   cupsRasterClose(ras);
   if (fd) close(fd);
   cupsFreeOptions(nopts, opts);

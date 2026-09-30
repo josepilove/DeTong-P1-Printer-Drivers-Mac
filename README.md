@@ -12,7 +12,13 @@ A CUPS raster filter + PPD for the DeTong P1 (USB 3533:5a11).
     ./scripts/install-mac.sh
 
 ## Status
-Filter output is verified in software only (decoded byte stream); **not yet
-tested on hardware**. Known risks: macOS filter sandbox, stock `usb` backend
+Verified on hardware: short and long jobs print.
 has no reset-before-job, pacing relies on the backend forwarding data as it
 arrives. Tune pause with `DETONG_BAND_MS`.
+
+## Printing text
+`lp` uses 10 chars/inch by default, which is huge on a 42 mm strip. Try:
+
+    lp -d DeTong_P1 -o cpi=20 -o lpi=10 README.md
+
+Make it the default: `lpoptions -p DeTong_P1 -o cpi=20 -o lpi=10`
