@@ -60,6 +60,16 @@ static void send_band(const unsigned char *rows, int nrows, int pause_ms)
   if (pause_ms > 0) usleep((useconds_t)pause_ms * 1000);
 }
 
+/* Append one row to the band, sending the band when full. */
+static void add_row(unsigned char *band, int *band_rows, const unsigned char *row, int pause_ms)
+{
+  memcpy(band + (size_t)*band_rows * HEAD_BYTES, row, HEAD_BYTES);
+  if (++*band_rows == BAND_ROWS) {
+    send_band(band, *band_rows, pause_ms);
+    *band_rows = 0;
+  }
+}
+
 /* 8-bit luminance, 0 = black, 255 = white, for one raster line. */
 static void to_gray(const unsigned char *in, unsigned w,
                     cups_cspace_t cs, unsigned bpp_bytes, unsigned char *g)
@@ -92,12 +102,19 @@ int main(int argc, char *argv[])
 
   cups_option_t *opts = NULL;
   int nopts = cupsParseOptions(argv[5], 0, &opts);
-  const char *dither_opt = cupsGetOption("DeTongDither", nopts, NULL);
+  const char *dither_opt = cupsGetOption("DeTongDither", nopts, opts);
   int dither = dither_opt && !strcasecmp(dither_opt, "Diffuse");
-  const char *thr_opt = cupsGetOption("DeTongThreshold", nopts, NULL);
+  const char *thr_opt = cupsGetOption("DeTongThreshold", nopts, opts);
   int threshold = thr_opt ? atoi(thr_opt) : 128;
   const char *ms_env = getenv("DETONG_BAND_MS");
   int pause_ms = ms_env ? atoi(ms_env) : 400;
+  /* Blank dot rows dropped at each page boundary (16 dots = 2 mm). */
+  const char *trim_opt = cupsGetOption("DeTongGapTrim", nopts, opts);
+  int gap_trim = trim_opt ? atoi(trim_opt) : 16;
+  unsigned char *band = calloc(BAND_ROWS, HEAD_BYTES);
+  unsigned char rowbuf[HEAD_BYTES], blank[HEAD_BYTES] = { 0 };
+  int band_rows = 0;
+  long pending_blank = 0;   /* blank rows held back until content follows */
 
   cups_raster_t *ras = cupsRasterOpen(fd, CUPS_RASTER_READ);
   cups_page_header2_t h;
@@ -122,15 +139,17 @@ int main(int argc, char *argv[])
     unsigned char *line = malloc(h.cupsBytesPerLine);
     unsigned char *gray = malloc(w + 2);
     int *err_cur = calloc(w + 2, sizeof(int)), *err_nxt = calloc(w + 2, sizeof(int));
-    unsigned char *band = calloc(BAND_ROWS, HEAD_BYTES);
     unsigned bpp_bytes = h.cupsBytesPerLine / (w ? w : 1);
-    int band_rows = 0;
+    if (page > 1) {           /* shorten the gap between pages */
+      pending_blank -= gap_trim;
+      if (pending_blank < 0) pending_blank = 0;
+    }
 
     for (unsigned y = 0; y < h.cupsHeight; y++) {
       if (cupsRasterReadPixels(ras, line, h.cupsBytesPerLine) != h.cupsBytesPerLine) break;
       to_gray(line, w, h.cupsColorSpace, bpp_bytes, gray);
 
-      unsigned char *row = band + (size_t)band_rows * HEAD_BYTES;
+      unsigned char *row = rowbuf;
       memset(row, 0, HEAD_BYTES);
       for (unsigned x = 0; x < w && x < PRINTABLE; x++) {
         int v = gray[x];
@@ -155,16 +174,22 @@ int main(int argc, char *argv[])
         int *t = err_cur; err_cur = err_nxt; err_nxt = t;
         memset(err_nxt, 0, (w + 2) * sizeof(int));
       }
-      if (++band_rows == BAND_ROWS) {
-        send_band(band, band_rows, pause_ms);
-        band_rows = 0;
+      if (memcmp(row, blank, HEAD_BYTES) == 0) {
+        pending_blank++;
+      } else {
+        for (; pending_blank > 0; pending_blank--)
+          add_row(band, &band_rows, blank, pause_ms);
+        add_row(band, &band_rows, row, pause_ms);
       }
     }
-    if (band_rows) send_band(band, band_rows, pause_ms);
-    if (pause_ms > 0) usleep((useconds_t)pause_ms * 1000);
 
-    free(line); free(gray); free(err_cur); free(err_nxt); free(band);
+    free(line); free(gray); free(err_cur); free(err_nxt);
   }
+
+  for (; pending_blank > 0; pending_blank--)
+    add_row(band, &band_rows, blank, pause_ms);
+  if (band_rows) send_band(band, band_rows, pause_ms);
+  free(band);
 
   /* One tear feed per job: pages are slices of a continuous roll. */
   if (started) feed(TRAILING_FEED);

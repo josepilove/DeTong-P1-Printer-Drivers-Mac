@@ -22,3 +22,7 @@ arrives. Tune pause with `DETONG_BAND_MS`.
     lp -d DeTong_P1 -o cpi=20 -o lpi=10 README.md
 
 Make it the default: `lpoptions -p DeTong_P1 -o cpi=20 -o lpi=10`
+
+## Page gap
+The filter drops 2 mm (16 dots) of blank rows at each page boundary. Change it
+with `-o DeTongGapTrim=<dots>` (203 dots = 1 inch; 0 disables).
