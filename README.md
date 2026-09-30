@@ -98,5 +98,13 @@ tests; the output byte stream is checked by decoding it.
 Issues and pull requests are welcome, especially: results from other DeTong
 models, a `.pkg` installer, Intel/older-macOS testing, and status readback.
 
+## AI use disclosure
+This driver was written with substantial help from an AI assistant (Anthropic's
+Claude, via Claude Code). The printer's behaviour was measured by a human on
+real hardware, and the code has been run against that printer, but it has not
+had an independent human code review. Read the code before you trust it: the
+filter runs as a system print filter on your Mac (under `sudo` at install
+time). Bug reports and reviews are welcome.
+
 ## License
 [MIT](LICENSE)
