@@ -26,3 +26,8 @@ Make it the default: `lpoptions -p DeTong_P1 -o cpi=20 -o lpi=10`
 ## Page gap
 The filter drops 2 mm (16 dots) of blank rows at each page boundary. Change it
 with `-o DeTongGapTrim=<dots>` (203 dots = 1 inch; 0 disables).
+
+## Printing from apps (TextEdit, CotEditor, browsers)
+Cocoa apps apply ~1" page margins, which leave no room on a 42 mm page. Pick
+one of the **Wide x2 / Wide x3** paper sizes instead; the filter shrinks the
+wider page to fit the strip (Wide x2 = 50 %, Wide x3 = 33 %).

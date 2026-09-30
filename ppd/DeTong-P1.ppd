@@ -31,6 +31,10 @@
 *PageSize P1_120x200/42mm x 70mm: "<</PageSize[120 200]/ImagingBBox null>>setpagedevice"
 *PageSize P1_120x300/42mm x 105mm: "<</PageSize[120 300]/ImagingBBox null>>setpagedevice"
 *PageSize P1_120x500/42mm x 176mm: "<</PageSize[120 500]/ImagingBBox null>>setpagedevice"
+*PageSize P1_242x400/Wide x2 (85mm x 141mm): "<</PageSize[242 400]/ImagingBBox null>>setpagedevice"
+*PageSize P1_242x800/Wide x2 (85mm x 282mm): "<</PageSize[242 800]/ImagingBBox null>>setpagedevice"
+*PageSize P1_362x600/Wide x3 (128mm x 212mm): "<</PageSize[362 600]/ImagingBBox null>>setpagedevice"
+*PageSize P1_362x1200/Wide x3 (128mm x 423mm): "<</PageSize[362 1200]/ImagingBBox null>>setpagedevice"
 *CloseUI: *PageSize
 
 *OpenUI *PageRegion: PickOne
@@ -40,6 +44,10 @@
 *PageRegion P1_120x200/42mm x 70mm: "<</PageSize[120 200]/ImagingBBox null>>setpagedevice"
 *PageRegion P1_120x300/42mm x 105mm: "<</PageSize[120 300]/ImagingBBox null>>setpagedevice"
 *PageRegion P1_120x500/42mm x 176mm: "<</PageSize[120 500]/ImagingBBox null>>setpagedevice"
+*PageRegion P1_242x400/Wide x2 (85mm x 141mm): "<</PageSize[242 400]/ImagingBBox null>>setpagedevice"
+*PageRegion P1_242x800/Wide x2 (85mm x 282mm): "<</PageSize[242 800]/ImagingBBox null>>setpagedevice"
+*PageRegion P1_362x600/Wide x3 (128mm x 212mm): "<</PageSize[362 600]/ImagingBBox null>>setpagedevice"
+*PageRegion P1_362x1200/Wide x3 (128mm x 423mm): "<</PageSize[362 1200]/ImagingBBox null>>setpagedevice"
 *CloseUI: *PageRegion
 
 *DefaultImageableArea: P1_120x200
@@ -47,17 +55,25 @@
 *ImageableArea P1_120x200: "0 0 120 200"
 *ImageableArea P1_120x300: "0 0 120 300"
 *ImageableArea P1_120x500: "0 0 120 500"
+*ImageableArea P1_242x400: "0 0 242 400"
+*ImageableArea P1_242x800: "0 0 242 800"
+*ImageableArea P1_362x600: "0 0 362 600"
+*ImageableArea P1_362x1200: "0 0 362 1200"
 *DefaultPaperDimension: P1_120x200
 *PaperDimension P1_120x100: "120 100"
 *PaperDimension P1_120x200: "120 200"
 *PaperDimension P1_120x300: "120 300"
 *PaperDimension P1_120x500: "120 500"
+*PaperDimension P1_242x400: "242 400"
+*PaperDimension P1_242x800: "242 800"
+*PaperDimension P1_362x600: "362 600"
+*PaperDimension P1_362x1200: "362 1200"
 
-*MaxMediaWidth: "120"
+*MaxMediaWidth: "362"
 *MaxMediaHeight: "14400"
 *HWMargins: 0 0 0 0
 *CustomPageSize True: "pop pop pop <</PageSize[5 -2 roll]/ImagingBBox null>>setpagedevice"
-*ParamCustomPageSize Width: 1 points 72 120
+*ParamCustomPageSize Width: 1 points 72 362
 *ParamCustomPageSize Height: 2 points 36 14400
 *ParamCustomPageSize WidthOffset: 3 points 0 0
 *ParamCustomPageSize HeightOffset: 4 points 0 0

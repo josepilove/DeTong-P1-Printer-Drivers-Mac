@@ -145,13 +145,32 @@ int main(int argc, char *argv[])
       if (pending_blank < 0) pending_blank = 0;
     }
 
-    for (unsigned y = 0; y < h.cupsHeight; y++) {
-      if (cupsRasterReadPixels(ras, line, h.cupsBytesPerLine) != h.cupsBytesPerLine) break;
-      to_gray(line, w, h.cupsColorSpace, bpp_bytes, gray);
+    /* Wide pages (for apps that force ~1" margins) are shrunk by an integer
+     * factor n so that the page width maps onto the printable dots. */
+    unsigned n = (w >= PRINTABLE * 3 / 2) ? (w + PRINTABLE / 2) / PRINTABLE : 1;
+    unsigned wo = w / n;
+    unsigned char *rawg = malloc(w + 2);
+    unsigned *acc = calloc(wo + 1, sizeof(unsigned));
+    int eof = 0;
+
+    for (unsigned y = 0; y < h.cupsHeight && !eof; y += n) {
+      unsigned rk = 0;
+      memset(acc, 0, (wo + 1) * sizeof(unsigned));
+      for (unsigned k = 0; k < n && y + k < h.cupsHeight; k++) {
+        if (cupsRasterReadPixels(ras, line, h.cupsBytesPerLine) != h.cupsBytesPerLine) {
+          eof = 1;
+          break;
+        }
+        to_gray(line, w, h.cupsColorSpace, bpp_bytes, rawg);
+        for (unsigned x = 0; x < wo * n; x++) acc[x / n] += rawg[x];
+        rk++;
+      }
+      if (!rk) break;
+      for (unsigned x = 0; x < wo; x++) gray[x] = (unsigned char)(acc[x] / (n * rk));
 
       unsigned char *row = rowbuf;
       memset(row, 0, HEAD_BYTES);
-      for (unsigned x = 0; x < w && x < PRINTABLE; x++) {
+      for (unsigned x = 0; x < wo && x < PRINTABLE; x++) {
         int v = gray[x];
         int black;
         if (dither) {
@@ -183,7 +202,7 @@ int main(int argc, char *argv[])
       }
     }
 
-    free(line); free(gray); free(err_cur); free(err_nxt);
+    free(line); free(gray); free(rawg); free(acc); free(err_cur); free(err_nxt);
   }
 
   for (; pending_blank > 0; pending_blank--)
